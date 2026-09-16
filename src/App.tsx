@@ -11,6 +11,7 @@ import { RecommendationStudio } from './components/RecommendationStudio';
 import { BiReporting } from './components/BiReporting';
 import { AIShoppingAssistant } from './components/AIShoppingAssistant';
 import { AIDataAnalyst } from './components/AIDataAnalyst';
+import { Milestone4Hub } from './components/Milestone4Hub';
 import { INITIAL_PRODUCTS, INITIAL_CUSTOMERS } from './mockData';
 import { Product } from './types';
 
@@ -57,6 +58,21 @@ export default function App() {
 
         {activeTab === 'roadmap' && (
           <MilestoneTracker onNavigate={tab => setActiveTab(tab)} />
+        )}
+
+        {activeTab === 'milestone4' && (
+          <Milestone4Hub 
+            products={products}
+            onUpdateProductStock={handleUpdateStock}
+            onRefreshCatalog={() => {
+              fetch('/api/products')
+                .then(r => r.json())
+                .then(data => {
+                  if (Array.isArray(data)) setProducts(data);
+                })
+                .catch(() => {});
+            }}
+          />
         )}
 
         {activeTab === 'vendors' && (
@@ -108,23 +124,6 @@ export default function App() {
           <AIDataAnalyst />
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-4 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-          <div className="flex items-center space-x-2">
-            <span className="font-semibold text-slate-700">ShopSense Intelligence Suite</span>
-            <span>•</span>
-            <span>Milestone 1, 2 & 3 Compliance</span>
-          </div>
-          <div className="flex items-center space-x-4 text-[11px]">
-            <span>Gemini 3.7 Flash</span>
-            <span>Vision API</span>
-            <span>pgvector Simulator</span>
-            <span>Holt-Winters ML</span>
-          </div>
-        </div>
-      </footer>
       </div>
     </div>
   );

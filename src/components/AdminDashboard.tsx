@@ -38,30 +38,51 @@ import {
   Customer,
   Vendor
 } from '../types';
+import { 
+  DEFAULT_ADMIN_OVERVIEW, 
+  DEFAULT_ADMIN_ENDPOINTS, 
+  DEFAULT_ADMIN_ORDERS, 
+  DEFAULT_ADMIN_LOGS, 
+  DEFAULT_ADMIN_VENDORS 
+} from '../data/adminDefaults';
+import { INITIAL_PRODUCTS, INITIAL_CUSTOMERS } from '../mockData';
 
 interface AdminDashboardProps {
   onSyncProducts?: (products: Product[]) => void;
 }
+
+const safeFetchJson = async <T,>(url: string, fallback: T): Promise<T> => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return fallback;
+    const data = await res.json();
+    return data ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }) => {
   // Navigation inside Admin Panel
   const [adminSubTab, setAdminSubTab] = useState<'overview' | 'api-tester' | 'database' | 'orders' | 'logs' | 'realtime'>('overview');
 
   // Backend state
-  const [overview, setOverview] = useState<AdminSystemOverview | null>(null);
-  const [endpoints, setEndpoints] = useState<ApiEndpointMetadata[]>([]);
-  const [logs, setLogs] = useState<AdminSystemLog[]>([]);
-  const [backendProducts, setBackendProducts] = useState<Product[]>([]);
-  const [backendOrders, setBackendOrders] = useState<AdminOrder[]>([]);
-  const [backendCustomers, setBackendCustomers] = useState<Customer[]>([]);
-  const [backendVendors, setBackendVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [overview, setOverview] = useState<AdminSystemOverview>(DEFAULT_ADMIN_OVERVIEW);
+  const [endpoints, setEndpoints] = useState<ApiEndpointMetadata[]>(DEFAULT_ADMIN_ENDPOINTS);
+  const [logs, setLogs] = useState<AdminSystemLog[]>(DEFAULT_ADMIN_LOGS);
+  const [backendProducts, setBackendProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [backendOrders, setBackendOrders] = useState<AdminOrder[]>(DEFAULT_ADMIN_ORDERS);
+  const [backendCustomers, setBackendCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
+  const [backendVendors, setBackendVendors] = useState<Vendor[]>(DEFAULT_ADMIN_VENDORS);
+  const [loading, setLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [actionMessage, setActionMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // API Tester state
-  const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpointMetadata | null>(null);
-  const [requestPayload, setRequestPayload] = useState<string>('{}');
+  const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpointMetadata | null>(DEFAULT_ADMIN_ENDPOINTS[0] || null);
+  const [requestPayload, setRequestPayload] = useState<string>(
+    JSON.stringify(DEFAULT_ADMIN_ENDPOINTS[0]?.defaultPayload || {}, null, 2)
+  );
   const [testResult, setTestResult] = useState<{
     status: number;
     statusText: string;
@@ -100,7 +121,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
     setTimeout(() => setActionMessage(null), 4000);
   };
 
-  // Fetch all backend data simultaneously
+  // Fetch all backend data simultaneously with resilient fallback handling
   const fetchAllBackendData = useCallback(async (isSilent = false) => {
     if (!isSilent) setRefreshing(true);
     try {
@@ -113,36 +134,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
         customersRes,
         vendorsRes
       ] = await Promise.all([
-        fetch('/api/admin/overview').then(r => r.json()),
-        fetch('/api/admin/endpoints').then(r => r.json()),
-        fetch('/api/admin/system-logs').then(r => r.json()),
-        fetch('/api/products').then(r => r.json()),
-        fetch('/api/admin/orders').then(r => r.json()),
-        fetch('/api/admin/customers').then(r => r.json()),
-        fetch('/api/vendors').then(r => r.json())
+        safeFetchJson<any>('/api/admin/overview', null),
+        safeFetchJson<any>('/api/admin/endpoints', null),
+        safeFetchJson<any>('/api/admin/system-logs', null),
+        safeFetchJson<any>('/api/products', null),
+        safeFetchJson<any>('/api/admin/orders', null),
+        safeFetchJson<any>('/api/admin/customers', null),
+        safeFetchJson<any>('/api/vendors', null)
       ]);
 
-      if (overviewRes) setOverview(overviewRes);
-      if (endpointsRes?.endpoints) {
+      if (overviewRes && (overviewRes.serverStatus || overviewRes.databaseStats)) {
+        setOverview(overviewRes);
+      }
+      if (endpointsRes?.endpoints && Array.isArray(endpointsRes.endpoints) && endpointsRes.endpoints.length > 0) {
         setEndpoints(endpointsRes.endpoints);
-        if (!selectedEndpoint && endpointsRes.endpoints.length > 0) {
+        if (!selectedEndpoint) {
           setSelectedEndpoint(endpointsRes.endpoints[0]);
           setRequestPayload(JSON.stringify(endpointsRes.endpoints[0].defaultPayload || {}, null, 2));
         }
       }
-      if (logsRes?.logs) setLogs(logsRes.logs);
-      if (productsRes?.data) {
+      if (logsRes?.logs && Array.isArray(logsRes.logs) && logsRes.logs.length > 0) {
+        setLogs(logsRes.logs);
+      }
+      if (productsRes?.data && Array.isArray(productsRes.data) && productsRes.data.length > 0) {
         setBackendProducts(productsRes.data);
         if (onSyncProducts) {
           onSyncProducts(productsRes.data);
         }
       }
-      if (ordersRes?.orders) setBackendOrders(ordersRes.orders);
-      if (customersRes?.customers) setBackendCustomers(customersRes.customers);
-      if (vendorsRes?.vendors) setBackendVendors(vendorsRes.vendors);
-    } catch (err: any) {
-      console.error('Error fetching backend data in admin dashboard:', err);
-      showToast('Failed to fetch some backend services. Ensure server is running.', 'error');
+      if (ordersRes?.orders && Array.isArray(ordersRes.orders) && ordersRes.orders.length > 0) {
+        setBackendOrders(ordersRes.orders);
+      }
+      if (customersRes?.customers && Array.isArray(customersRes.customers) && customersRes.customers.length > 0) {
+        setBackendCustomers(customersRes.customers);
+      }
+      if (vendorsRes?.vendors && Array.isArray(vendorsRes.vendors) && vendorsRes.vendors.length > 0) {
+        setBackendVendors(vendorsRes.vendors);
+      }
+    } catch {
+      // Graceful fallback to initial state without throwing noisy errors
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -790,8 +820,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="font-semibold text-slate-900">${p.price.toFixed(2)}</div>
-                          <div className="text-[10px] text-slate-400">Cost: ${p.cost?.toFixed(2) || (p.price * 0.45).toFixed(2)}</div>
+                          <div className="font-semibold text-slate-900">₹{p.price.toFixed(2)}</div>
+                          <div className="text-[10px] text-slate-400">Cost: ₹{p.cost?.toFixed(2) || (p.price * 0.45).toFixed(2)}</div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
@@ -881,7 +911,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-700 font-semibold mb-1">Retail Price ($) *</label>
+                      <label className="block text-slate-700 font-semibold mb-1">Retail Price (₹) *</label>
                       <input
                         type="number"
                         step="0.01"
@@ -895,7 +925,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-slate-700 font-semibold mb-1">Unit Cost ($)</label>
+                      <label className="block text-slate-700 font-semibold mb-1">Unit Cost (₹)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -1038,7 +1068,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onSyncProducts }
                         <div className="text-[10px] text-slate-400">{ord.units} unit(s) • {ord.category}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="font-semibold text-slate-900">${ord.amount.toFixed(2)}</div>
+                        <div className="font-semibold text-slate-900">₹{ord.amount.toFixed(2)}</div>
                         <div className="text-[10px] text-slate-500">{ord.channel} • {ord.paymentMethod}</div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">

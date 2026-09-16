@@ -69,10 +69,10 @@ export const AIDataAnalyst: React.FC = () => {
         resultTable: {
           columns: ['category', 'total_skus', 'total_units_sold', 'estimated_30d_revenue', 'avg_margin_pct'],
           rows: [
-            { category: 'Electronics & Audio', total_skus: 4, total_units_sold: 215, estimated_30d_revenue: '$38,420.00', avg_margin_pct: '56.4%' },
-            { category: 'Footwear & Apparel', total_skus: 2, total_units_sold: 142, estimated_30d_revenue: '$22,640.00', avg_margin_pct: '62.1%' },
-            { category: 'Home & Kitchen', total_skus: 2, total_units_sold: 78, estimated_30d_revenue: '$14,820.00', avg_margin_pct: '51.8%' },
-            { category: 'Accessories & Travel', total_skus: 2, total_units_sold: 96, estimated_30d_revenue: '$8,450.00', avg_margin_pct: '68.2%' }
+            { category: 'Electronics & Audio', total_skus: 4, total_units_sold: 215, estimated_30d_revenue: '₹38,420.00', avg_margin_pct: '56.4%' },
+            { category: 'Footwear & Apparel', total_skus: 2, total_units_sold: 142, estimated_30d_revenue: '₹22,640.00', avg_margin_pct: '62.1%' },
+            { category: 'Home & Kitchen', total_skus: 2, total_units_sold: 78, estimated_30d_revenue: '₹14,820.00', avg_margin_pct: '51.8%' },
+            { category: 'Accessories & Travel', total_skus: 2, total_units_sold: 96, estimated_30d_revenue: '₹8,450.00', avg_margin_pct: '68.2%' }
           ]
         }
       });
@@ -91,7 +91,7 @@ export const AIDataAnalyst: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
+      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
         <div className="relative z-10 flex items-center space-x-3">
           <div className="p-2.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300">

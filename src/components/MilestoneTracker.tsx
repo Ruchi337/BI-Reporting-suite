@@ -11,7 +11,12 @@ import {
   Brain,
   Sliders,
   Cpu,
-  Radio
+  Radio,
+  Bot,
+  Container,
+  GitBranch,
+  FileText,
+  TestTube2
 } from 'lucide-react';
 
 interface MilestoneTrackerProps {
@@ -22,7 +27,7 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ onNavigate }
   return (
     <div className="space-y-6">
       {/* Milestone Overview Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/50 rounded-2xl p-6 text-white shadow-xl">
+      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/50 rounded-2xl p-6 text-white shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2 text-indigo-400 text-xs font-semibold tracking-wider uppercase mb-1">
@@ -32,21 +37,21 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ onNavigate }
             <h1 className="text-2xl font-bold text-white tracking-tight">
               E-Commerce Intelligence & AI Architecture
             </h1>
-            <p className="text-sm text-slate-300 mt-1 max-w-2xl">
-              Complete implementation of Milestone 1 (GenAI & Vision), Milestone 2 (Inventory Intelligence, ML Forecasting, SQL Segmentation & Sentiment), and Milestone 3 (BI Reporting).
+            <p className="text-sm text-slate-300 mt-1 max-w-3xl">
+              Complete end-to-end implementation across all 4 Milestones: GenAI & Vision (W1-2), Forecasting & Segmentation (W3-4), BI Reporting (W5-6), and Optimization, Testing & Deployment (W7-8).
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-2 text-center">
-              <span className="text-xs text-emerald-400 font-medium block">All Requirements</span>
+              <span className="text-xs text-emerald-400 font-medium block">All 4 Milestones</span>
               <span className="text-lg font-bold text-emerald-300">100% Implemented</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3 Milestone Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 4 Milestone Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Milestone 1 */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
           <div>
@@ -266,6 +271,83 @@ export const MilestoneTracker: React.FC<MilestoneTrackerProps> = ({ onNavigate }
             >
               AI Analyst
             </button>
+          </div>
+        </div>
+
+        {/* Milestone 4: Optimization, Testing & Deployment */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                Milestone 4
+              </span>
+              <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Base & Adv 100%
+              </span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mb-1">Testing & Deployment</h2>
+            <p className="text-xs text-slate-500 mb-4">Weeks 7-8 • Production & AI Agent</p>
+
+            <div className="space-y-3">
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
+                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider block mb-1">
+                  ✅ Base Requirements:
+                </span>
+                <ul className="space-y-1.5 text-xs text-slate-600">
+                  <li className="flex items-center gap-1.5">
+                    <Container className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                    <span><strong>Docker Packaging:</strong> Multi-stage Dockerfile & compose</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span><strong>OpenAPI & Swagger:</strong> Schema specs & interactive docs</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <TestTube2 className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                    <span><strong>API Unit Tests:</strong> Node test suite with assertions</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-indigo-50/50 rounded-xl p-3 border border-indigo-100">
+                <span className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider block mb-1">
+                  🚀 Advanced / Optional Features:
+                </span>
+                <ul className="space-y-1.5 text-xs text-indigo-950">
+                  <li className="flex items-center gap-1.5">
+                    <Bot className="h-3.5 w-3.5 text-indigo-600 shrink-0" />
+                    <span><strong>Autonomous AI Agent:</strong> Weekly audit & strategic email</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span><strong>Cloud Deployment:</strong> AWS RDS, Render, Heroku</span>
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <GitBranch className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                    <span><strong>CI/CD Pipelines:</strong> GitHub Actions lint, test & build</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mt-5">
+            <button
+              onClick={() => onNavigate('milestone4')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 px-2 rounded-xl transition-colors text-center flex items-center justify-center gap-1.5"
+            >
+              <Bot className="h-3.5 w-3.5" />
+              <span>AI Agent Hub</span>
+            </button>
+            <a
+              href="/api/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold py-2 px-2 rounded-xl transition-colors text-center flex items-center justify-center gap-1.5"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Swagger UI</span>
+            </a>
           </div>
         </div>
       </div>

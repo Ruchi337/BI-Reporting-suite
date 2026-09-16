@@ -108,9 +108,6 @@ export const ReviewSentiment: React.FC<ReviewSentimentProps> = ({ products }) =>
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900">LLM Customer Review Sentiment Intelligence</h2>
-            <span className="bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-              Milestone 2 Advanced
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Gemini NLP pipeline extracting sentiment scores, top pros & cons summaries, and actionable vendor fixes.
@@ -251,7 +248,7 @@ export const ReviewSentiment: React.FC<ReviewSentimentProps> = ({ products }) =>
 
       {/* Vendor Executive Summary & Actionable Recommendations */}
       {sentimentResult && (
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl border border-indigo-900/50 text-white shadow-md space-y-4">
+        <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl border border-indigo-900/50 text-white shadow-md space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-indigo-800/60">
             <Lightbulb className="h-4 w-4 text-amber-400" />
             <h3 className="font-bold text-white text-sm">Vendor Executive Action Plan</h3>

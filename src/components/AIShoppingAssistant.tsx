@@ -11,7 +11,6 @@ import {
   Search, 
   ChevronRight, 
   RefreshCw, 
-  DollarSign, 
   Tag, 
   SlidersHorizontal,
   User
@@ -33,10 +32,10 @@ interface ChatMessage {
 }
 
 const STARTER_PROMPTS = [
-  "What's the best laptop or workstation setup for video editing under $1000?",
+  "What's the best laptop or workstation setup for video editing under ₹1000?",
   "Show me affordable products for gaming with high ratings.",
   "Which audio product has the best overall value and battery life?",
-  "Recommend ergonomic items from my catalog for home office under $500."
+  "Recommend ergonomic items from my catalog for home office under ₹500."
 ];
 
 export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ products }) => {
@@ -52,7 +51,7 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
       timestamp: 'Just now',
       suggestedFollowUps: [
         "What noise-cancelling headphones do you recommend?",
-        "Show me products under $100 with 4.5+ star ratings",
+        "Show me products under ₹100 with 4.5+ star ratings",
         "Find ergonomic items for a comfortable desk setup"
       ]
     }
@@ -178,7 +177,7 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
+      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -186,13 +185,10 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
               <div className="p-2.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300">
                 <Bot className="h-6 w-6" />
               </div>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
-                Milestone 3 Advanced RAG Feature
-              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                RAG-Powered AI Shopping Assistant
+              </h1>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              RAG-Powered AI Shopping Assistant
-            </h1>
             <p className="text-slate-300 text-sm max-w-2xl mt-1">
               Conversational buying advisor grounded directly in your authentic store catalog. Answers shopper queries with exact SKU specs, verified pricing, in-stock availability, and intelligent trade-off comparisons.
             </p>
@@ -236,7 +232,7 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
             <div>
               <div className="flex items-center justify-between text-xs font-semibold text-slate-600 mb-1.5">
                 <span>Maximum Budget</span>
-                <span className="text-indigo-600 font-bold">${maxPrice}</span>
+                <span className="text-indigo-600 font-bold">₹{maxPrice}</span>
               </div>
               <input
                 type="range"
@@ -272,7 +268,7 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
         </div>
 
         {/* Right Interactive Chat Stream */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[700px] overflow-hidden">
+        <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-175 overflow-hidden">
           {/* Chat Messages Log */}
           <div className="flex-1 p-6 overflow-y-auto space-y-6">
             {chatHistory.map(msg => (
@@ -327,7 +323,7 @@ export const AIShoppingAssistant: React.FC<AIShoppingAssistantProps> = ({ produc
                                 </span>
                                 <h5 className="font-bold text-slate-900 text-xs line-clamp-1">{prod.name}</h5>
                                 <div className="mt-1 flex items-center space-x-2">
-                                  <span className="font-black text-slate-900 text-sm">${prod.price.toFixed(2)}</span>
+                                  <span className="font-black text-slate-900 text-sm">₹{prod.price.toFixed(2)}</span>
                                   <div className="flex items-center text-amber-500 text-[11px] font-bold">
                                     <Star className="h-3 w-3 fill-amber-400 mr-0.5" />
                                     <span>{prod.rating}</span>

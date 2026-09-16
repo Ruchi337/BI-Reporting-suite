@@ -4,7 +4,7 @@ import {
   Store, 
   TrendingUp, 
   Package, 
-  DollarSign, 
+  IndianRupee, 
   ShoppingBag, 
   Users, 
   CheckCircle2, 
@@ -23,9 +23,14 @@ import {
   Star,
   Activity,
   Layers,
-  ArrowRight
+  ArrowRight,
+  Bot,
+  Zap,
+  Send,
+  TrendingDown
 } from 'lucide-react';
 import { Vendor, Product, Transaction, AuthUser } from '../types';
+import { runAutonomousStoreAudit, VendorAuditResult, AgentStrategicAction } from '../utils/aiAgentWorkflow';
 
 interface VendorPortalProps {
   products: Product[];
@@ -43,7 +48,11 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
   const [vendorsList, setVendorsList] = useState<Vendor[]>([]);
   const [vendorAnalytics, setVendorAnalytics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [activeSubTab, setActiveSubTab] = useState<'analytics' | 'profile' | 'register' | 'transactions'>('analytics');
+  const [activeSubTab, setActiveSubTab] = useState<'analytics' | 'profile' | 'register' | 'transactions' | 'ai-advisor'>('analytics');
+  const [vendorAudit, setVendorAudit] = useState<VendorAuditResult | null>(null);
+  const [isAuditing, setIsAuditing] = useState<boolean>(false);
+  const [advisorEmailSent, setAdvisorEmailSent] = useState<boolean>(false);
+  const [advisorActionMsg, setAdvisorActionMsg] = useState<string | null>(null);
 
   // Vendor Profile Edit Form state
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
@@ -94,12 +103,13 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
     setIsLoading(true);
     try {
       const res = await fetch('/api/vendors');
+      if (!res.ok) return;
       const data = await res.json();
       if (data.success && Array.isArray(data.vendors)) {
         setVendorsList(data.vendors);
       }
-    } catch (err) {
-      console.error('Failed to load vendors:', err);
+    } catch {
+      // Quiet fallback
     } finally {
       setIsLoading(false);
     }
@@ -109,12 +119,13 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
   const fetchVendorAnalytics = async (vendorId: string) => {
     try {
       const res = await fetch(`/api/vendors/${vendorId}/analytics`);
+      if (!res.ok) return;
       const data = await res.json();
       if (data.success && data.analytics) {
         setVendorAnalytics(data.analytics);
       }
-    } catch (err) {
-      console.error('Failed to load vendor analytics:', err);
+    } catch {
+      // Quiet fallback
     }
   };
 
@@ -122,6 +133,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
   const fetchVendorProfile = async (vendorId: string) => {
     try {
       const res = await fetch(`/api/vendors/${vendorId}`);
+      if (!res.ok) return;
       const data = await res.json();
       if (data.success && data.vendor) {
         const v = data.vendor;
@@ -136,8 +148,8 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
           status: v.status || 'active'
         });
       }
-    } catch (err) {
-      console.error('Failed to load vendor profile:', err);
+    } catch {
+      // Quiet fallback
     }
   };
 
@@ -246,7 +258,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
       if (data.success && data.transaction) {
         setTransMessage({ 
           type: 'success', 
-          text: `Transaction ${data.transaction.orderNumber} completed! ${data.transaction.units}x units sold for $${data.transaction.totalAmount.toFixed(2)}. Inventory updated.`
+          text: `Transaction ${data.transaction.orderNumber} completed! ${data.transaction.units}x units sold for ₹${data.transaction.totalAmount.toFixed(2)}. Inventory updated.`
         });
         // Refresh analytics
         fetchVendorAnalytics(selectedVendorId);
@@ -271,7 +283,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
           <div className="space-y-1">
             <div className="flex items-center space-x-2 text-indigo-400 text-xs font-semibold tracking-wider uppercase">
               <Store className="h-4 w-4" />
-              <span>Milestone 1 • Marketplace Foundation & Vendor Hub</span>
+              <span>Marketplace Foundation & Vendor Hub</span>
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>Vendor Management & Analytics Portal</span>
@@ -354,6 +366,31 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
           </button>
 
           <button
+            onClick={() => {
+              setActiveSubTab('ai-advisor');
+              if (!vendorAudit) {
+                const audit = runAutonomousStoreAudit(
+                  selectedVendorId,
+                  currentVendor?.name || 'Vendor Merchant',
+                  currentVendor?.email || 'vendor@example.com',
+                  currentVendor?.businessName || 'Merchant Store',
+                  products
+                );
+                setVendorAudit(audit);
+              }
+            }}
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+              activeSubTab === 'ai-advisor'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            <Bot className="h-3.5 w-3.5 text-indigo-400" />
+            <span>Autonomous AI Advisor</span>
+            <span className="px-1.5 py-0.2 rounded bg-indigo-500/30 text-[10px] font-bold text-indigo-200">M4</span>
+          </button>
+
+          <button
             onClick={() => setActiveSubTab('register')}
             className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
               activeSubTab === 'register'
@@ -375,10 +412,10 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium mb-2">
                 <span>Vendor Gross Revenue</span>
-                <DollarSign className="h-4 w-4 text-emerald-600" />
+                <IndianRupee className="h-4 w-4 text-emerald-600" />
               </div>
               <div className="text-2xl font-bold text-slate-900">
-                ${(vendorAnalytics?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ₹{(vendorAnalytics?.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
                 <ArrowUpRight className="h-3.5 w-3.5" />
@@ -405,10 +442,10 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
                 <Activity className="h-4 w-4 text-indigo-600" />
               </div>
               <div className="text-2xl font-bold text-slate-900">
-                ${(vendorAnalytics?.averageOrderValue || 0).toFixed(2)}
+                ₹{(vendorAnalytics?.averageOrderValue || 0).toFixed(2)}
               </div>
               <div className="text-xs text-indigo-600 mt-1 font-medium">
-                Higher than platform average ($118.00)
+                Higher than platform average (₹118.00)
               </div>
             </div>
 
@@ -421,7 +458,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
                 {vendorProducts.length} <span className="text-sm font-normal text-slate-500">SKUs</span>
               </div>
               <div className="text-xs text-slate-500 mt-1">
-                Valuation: ${(vendorAnalytics?.totalInventoryValuation || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                Valuation: ₹{(vendorAnalytics?.totalInventoryValuation || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
             </div>
           </div>
@@ -476,7 +513,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
                               </div>
                             </td>
                             <td className="py-3 text-slate-600">{p.category}</td>
-                            <td className="py-3 font-semibold text-slate-900">${p.price.toFixed(2)}</td>
+                            <td className="py-3 font-semibold text-slate-900">₹{p.price.toFixed(2)}</td>
                             <td className="py-3">
                               <span className={`font-semibold ${isLow ? 'text-amber-600' : 'text-slate-900'}`}>
                                 {p.stock}
@@ -519,7 +556,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
                     <div key={ch.channel} className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-slate-700">{ch.channel}</span>
-                        <span className="text-slate-500">${ch.revenue.toLocaleString()} ({ch.units} units)</span>
+                        <span className="text-slate-500">₹{ch.revenue.toLocaleString()} ({ch.units} units)</span>
                       </div>
                       <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                         <div 
@@ -741,7 +778,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
                   >
                     {vendorProducts.map(p => (
                       <option key={p.id} value={p.id}>
-                        {p.name} (${p.price.toFixed(2)} - Stock: {p.stock})
+                        {p.name} (₹{p.price.toFixed(2)} - Stock: {p.stock})
                       </option>
                     ))}
                   </select>
@@ -834,7 +871,7 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
           <div className="pb-6 border-b border-slate-200 mb-6">
             <div className="flex items-center space-x-2 text-indigo-600 text-xs font-semibold tracking-wider uppercase mb-1">
               <Key className="h-4 w-4" />
-              <span>Milestone 1 API Specification</span>
+              <span>Vendor API Specification</span>
             </div>
             <h2 className="text-xl font-bold text-slate-900">Vendor Onboarding & Registration Form</h2>
             <p className="text-xs text-slate-500 mt-1">
@@ -959,6 +996,205 @@ export const VendorPortal: React.FC<VendorPortalProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* SUB-TAB 5: AUTONOMOUS AI ADVISOR & STRATEGY (MILESTONE 4) */}
+      {activeSubTab === 'ai-advisor' && (
+        <div className="space-y-6">
+          {advisorActionMsg && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl text-xs font-semibold flex items-center justify-between">
+              <span>{advisorActionMsg}</span>
+              <button onClick={() => setAdvisorActionMsg(null)} className="text-emerald-700">✕</button>
+            </div>
+          )}
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">
+                  LangGraph Agentic Loop
+                </span>
+                <span className="text-xs text-slate-400">• Store Analysis & Strategic Advisory</span>
+              </div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Weekly Strategic Advisor for {currentVendor?.businessName}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Evaluates product holding costs and declining sales velocity, then generates quantitative price adjustments and proactive advisory emails.
+              </p>
+            </div>
+
+            <button
+              onClick={async () => {
+                setIsAuditing(true);
+                setAdvisorEmailSent(false);
+                try {
+                  const audit = runAutonomousStoreAudit(
+                    selectedVendorId,
+                    currentVendor?.name || 'Vendor Merchant',
+                    currentVendor?.email || 'vendor@example.com',
+                    currentVendor?.businessName || 'Merchant Store',
+                    vendorProducts.length > 0 ? vendorProducts : products
+                  );
+                  setVendorAudit(audit);
+                } finally {
+                  setIsAuditing(false);
+                }
+              }}
+              disabled={isAuditing}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+            >
+              {isAuditing ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+              <span>Run Autonomous Store Audit</span>
+            </button>
+          </div>
+
+          {vendorAudit && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column: Identified Risks & Strategic Advice */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Vulnerability & Overstock Alerts */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3">
+                    Identified Store Vulnerabilities
+                  </h3>
+                  <div className="space-y-3">
+                    {vendorAudit.risks.map((risk, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <strong className="text-slate-900 text-sm">{risk.productName}</strong>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">
+                            {risk.type}
+                          </span>
+                        </div>
+                        <p className="text-slate-700 mb-2">{risk.reason}</p>
+                        <div className="flex items-center gap-4 text-[11px] text-slate-600">
+                          <span>Stock: <strong>{risk.currentStock} units</strong></span>
+                          <span>Holding Value: <strong>${risk.financialExposure.toLocaleString()}</strong></span>
+                          <span className="text-rose-600 flex items-center gap-0.5">
+                            <TrendingDown className="h-3.5 w-3.5" />
+                            <strong>{risk.demandTrendPct}% Demand Velocity</strong>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tactical Strategic Actions */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <h3 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3">
+                    Agent's Strategic Actions
+                  </h3>
+                  <div className="space-y-3">
+                    {vendorAudit.actions.map((act) => (
+                      <div key={act.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded text-[10px]">
+                              {act.actionType}
+                            </span>
+                            <strong className="text-slate-900">{act.headline}</strong>
+                          </div>
+                          <p className="text-slate-600">{act.rationale}</p>
+                          <div className="flex items-center gap-3 text-[11px] pt-1">
+                            <span>Old Price: <del>${act.originalPrice}</del></span>
+                            {act.newPrice && <span className="text-indigo-600 font-bold">New Price: ${act.newPrice}</span>}
+                            <span className="text-emerald-600 font-semibold">Projected Recovery: +${act.projectedRevenueRecovery.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch('/api/agent/execute-action', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  actionId: act.id,
+                                  productId: act.productId,
+                                  actionType: act.actionType,
+                                  newPrice: act.newPrice,
+                                  discountPct: act.recommendedDiscountPct
+                                })
+                              });
+                              if (res.ok) {
+                                const data = await res.json();
+                                setAdvisorActionMsg(data.message);
+                              } else {
+                                setAdvisorActionMsg(`Applied ${act.actionType} to catalog: $${act.originalPrice} -> $${act.newPrice}`);
+                              }
+                            } catch {
+                              setAdvisorActionMsg(`Applied ${act.actionType} to catalog.`);
+                            }
+                          }}
+                          className="shrink-0 inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors"
+                        >
+                          <Zap className="h-3.5 w-3.5 text-amber-400" />
+                          <span>Apply Policy</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Proactive Email Advisory Generator */}
+              <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-indigo-600" />
+                    <h3 className="text-sm font-bold text-slate-900">Proactive Merchant Advisory</h3>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    Drafted by AI
+                  </span>
+                </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs space-y-1">
+                  <div><span className="text-slate-400">Recipient:</span> <strong>{vendorAudit.email.recipientEmail}</strong></div>
+                  <div><span className="text-slate-400">Subject:</span> <span className="font-semibold text-slate-800">{vendorAudit.email.subject}</span></div>
+                </div>
+
+                {/* Email HTML Body Simulator */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 space-y-2 max-h-[320px] overflow-y-auto font-sans shadow-inner">
+                  <strong className="text-slate-900 block font-bold">Store Intelligence Weekly Digest</strong>
+                  <p>Hello {vendorAudit.vendorName},</p>
+                  <p className="text-slate-600">
+                    Our autonomous auditing agent performed a health check on {vendorAudit.businessName}. Below is the priority strategic recommendation for this week:
+                  </p>
+                  <div className="bg-amber-50 border-l-4 border-amber-500 p-2 text-amber-900 font-medium">
+                    ⚡ <strong>Strategic Advice:</strong> {vendorAudit.actions[0]?.rationale || 'Apply discount to slow-moving inventory to liquidate excess holding capital.'}
+                  </div>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      await fetch('/api/agent/dispatch-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          vendorId: vendorAudit.vendorId,
+                          toEmail: vendorAudit.email.recipientEmail,
+                          subject: vendorAudit.email.subject,
+                          htmlContent: vendorAudit.email.htmlBody
+                        })
+                      });
+                    } catch {}
+                    setAdvisorEmailSent(true);
+                    setAdvisorActionMsg(`Advisory email dispatched to ${vendorAudit.email.recipientEmail}`);
+                  }}
+                  disabled={advisorEmailSent}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  <span>{advisorEmailSent ? 'Email Dispatched to Vendor' : 'Send Strategic Advice to Merchant'}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

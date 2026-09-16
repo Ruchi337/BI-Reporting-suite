@@ -186,7 +186,7 @@ export const SAMPLE_REVIEWS: Record<string, ReviewItem[]> = {
       customerName: 'Elena Rostova',
       rating: 5,
       date: '2026-07-15',
-      title: 'Best LDAC audiophile Bluetooth cans under $300',
+      title: 'Best LDAC audiophile Bluetooth cans under ₹300',
       comment: 'Crisp highs, punchy sub-bass without muddiness, and the mobile companion app has a genuine 10-band parametric EQ. Multipoint bluetooth connects to both my MacBook and iPhone seamlessly.',
       verifiedPurchase: true
     },

@@ -112,8 +112,8 @@ export function executeAnalyticalQuery(
       .map(([tier, data]) => ({
         segment_tier: tier,
         customer_count: data.count,
-        total_revenue: `$${data.totalRev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        avg_customer_ltv: `$${(data.count > 0 ? data.totalRev / data.count : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        total_revenue: `₹${data.totalRev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        avg_customer_ltv: `₹${(data.count > 0 ? data.totalRev / data.count : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         avg_orders_per_user: data.count > 0 ? (data.totalOrders / data.count).toFixed(1) : '0.0'
       }))
       .sort((a, b) => parseFloat(b.total_revenue.replace(/[^0-9.]/g, '')) - parseFloat(a.total_revenue.replace(/[^0-9.]/g, '')));
@@ -174,7 +174,7 @@ export function executeAnalyticalQuery(
       category: cat,
       total_skus: d.skus,
       total_units_in_stock: d.stock,
-      total_inventory_valuation: `$${d.valuation.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      total_inventory_valuation: `₹${d.valuation.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       avg_gross_margin_pct: `${(d.marginSum / d.skus).toFixed(1)}%`,
       total_units_sold_30d: d.sales30d
     })).sort((a, b) => parseFloat(b.total_inventory_valuation.replace(/[^0-9.]/g, '')) - parseFloat(a.total_inventory_valuation.replace(/[^0-9.]/g, '')));
@@ -195,7 +195,7 @@ export function executeAnalyticalQuery(
       id: c.id,
       name: c.name,
       email: c.email,
-      totalSpent: `$${c.totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      totalSpent: `₹${c.totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       orderCount: c.orderCount,
       daysSinceLastPurchase: `${c.daysSinceLastPurchase} days ago`,
       favoriteCategory: c.favoriteCategory
@@ -216,7 +216,7 @@ export function executeAnalyticalQuery(
     name: p.name,
     sku: p.sku,
     category: p.category,
-    price: `$${p.price.toFixed(2)}`,
+    price: `₹${p.price.toFixed(2)}`,
     stock: p.stock
   }));
 

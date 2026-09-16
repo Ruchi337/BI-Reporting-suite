@@ -29,17 +29,13 @@ interface NavSection {
     id: string;
     label: string;
     icon: React.ComponentType<{ className?: string }>;
-    badge?: string;
-    alert?: string;
-    isHighlight?: boolean;
     description?: string;
   }[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
-  setActiveTab,
-  lowStockCount
+  setActiveTab
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -50,16 +46,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'admin', 
           label: 'Admin Hub', 
           icon: Server, 
-          badge: 'Live Stack', 
-          isHighlight: true,
           description: 'API telemetry & system health'
         },
         { 
           id: 'roadmap', 
           label: 'Milestones Map', 
           icon: Layers, 
-          badge: 'Roadmap',
           description: 'Architecture & deliverables'
+        },
+        { 
+          id: 'milestone4', 
+          label: 'Testing & Deployment', 
+          icon: Sparkles, 
+          description: 'AI Agent, Swagger & CI/CD'
         },
       ]
     },
@@ -69,43 +68,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'vendors', 
           label: 'Vendor Hub & Portal', 
           icon: Store, 
-          badge: 'Portal',
           description: 'Merchant onboarding & KPIs'
         },
         { 
           id: 'catalog', 
           label: 'Product & Vision AI', 
           icon: Package, 
-          badge: 'Vision AI',
           description: 'Image recognition & copy generation'
         },
         { 
           id: 'inventory', 
           label: 'Inventory & Forecast', 
           icon: TrendingUp, 
-          badge: 'Forecasting', 
-          alert: lowStockCount > 0 ? `${lowStockCount} Low` : undefined,
           description: 'Holt-Winters demand forecasting'
         },
         { 
           id: 'customers', 
           label: 'Customer Segments', 
           icon: Users, 
-          badge: 'RFM',
           description: 'RFM customer segmentation'
         },
         { 
           id: 'sentiment', 
           label: 'Review Sentiment', 
           icon: MessageSquareHeart, 
-          badge: 'NLP',
           description: 'NLP sentiment & aspect analysis'
         },
         { 
           id: 'recommendations', 
           label: 'Vector AI Engine', 
           icon: Compass, 
-          badge: 'pgvector',
           description: 'Semantic pgvector recommendations'
         },
       ]
@@ -116,21 +108,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'bi', 
           label: 'BI Reporting Suite', 
           icon: Database, 
-          badge: 'Reporting',
           description: 'Executive GMV, RFC-4180 CSV export'
         },
         { 
           id: 'shopping-assistant', 
           label: 'RAG Shopping AI', 
           icon: Bot, 
-          badge: 'RAG',
           description: 'Grounded product recommendation assistant'
         },
         { 
           id: 'data-analyst', 
           label: 'AI Data Analyst', 
           icon: BarChart3, 
-          badge: 'Text-to-SQL',
           description: 'Read-only text-to-SQL business agent'
         },
       ]
@@ -147,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800">
         <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
+          <div className="h-10 w-10 rounded-xl bg-linear-to-tr from-indigo-600 via-indigo-500 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 shrink-0">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="min-w-0">
@@ -198,25 +187,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="truncate">{item.label}</span>
                   </div>
 
-                  <div className="flex items-center space-x-1.5 shrink-0 ml-2">
-                    {item.alert ? (
-                      <span className="bg-amber-400 text-slate-950 font-bold text-[9px] px-1.5 py-0.5 rounded-full">
-                        {item.alert}
-                      </span>
-                    ) : item.badge ? (
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${
-                        isActive 
-                          ? 'bg-indigo-700/80 text-indigo-100' 
-                          : 'bg-slate-800 text-slate-400 group-hover:bg-slate-700 group-hover:text-slate-300'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    ) : null}
-
-                    <ChevronRight className={`h-3 w-3 opacity-0 -translate-x-1 transition-all ${
-                      isActive ? 'opacity-100 translate-x-0 text-white' : 'group-hover:opacity-60 group-hover:translate-x-0'
-                    }`} />
-                  </div>
+                  <ChevronRight className={`h-3 w-3 shrink-0 ml-2 opacity-0 -translate-x-1 transition-all ${
+                    isActive ? 'opacity-100 translate-x-0 text-white' : 'group-hover:opacity-60 group-hover:translate-x-0 text-slate-400'
+                  }`} />
                 </button>
               );
             })}

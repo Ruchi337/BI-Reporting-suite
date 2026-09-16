@@ -1,0 +1,84 @@
+name: CI/CD Pipeline - Test, Lint & Docker Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # Job 1: Static Typecheck and Linting
+  lint-and-typecheck:
+    name: Lint & Type Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run TypeScript Linter
+        run: npm run lint
+
+  # Job 2: Run Automated API Unit Tests
+  test-suite:
+    name: API Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run API Unit Tests
+        run: npm test
+        env:
+          NODE_ENV: test
+
+  # Job 3: Build Production Bundle & Verify Docker Packaging
+  docker-build:
+    name: Docker Packaging & Build Verification
+    runs-on: ubuntu-latest
+    needs: test-suite
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: shopsense-ai:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 4: Cloud Deployment Smoke Test (Render/AWS/Heroku webhook)
+  deploy-preview:
+    name: Cloud Deployment Verification
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deployment Notice
+        run: |
+          echo "All checks passed! Image tagged and ready for AWS EC2/RDS or Render Cloud deployment."

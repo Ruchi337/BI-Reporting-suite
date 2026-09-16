@@ -10,7 +10,6 @@ import {
   Check, 
   Loader2, 
   Layers, 
-  DollarSign, 
   Boxes,
   Zap,
   Image as ImageIcon,
@@ -205,9 +204,6 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900">Product Catalog & Vision Lab</h2>
-            <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-              Milestone 1
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Vendor catalog with Vision Model auto-categorization and Gemini GenAI marketing descriptions.
@@ -282,7 +278,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     )}
                   </div>
                   <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-slate-900 font-bold text-xs px-2.5 py-1 rounded-lg shadow-sm">
-                    ${product.price.toFixed(2)}
+                    ₹{product.price.toFixed(2)}
                   </div>
                 </div>
 
@@ -496,7 +492,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Selling Price ($)</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Selling Price (₹)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -507,7 +503,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Cost ($)</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Cost (₹)</label>
                     <input
                       type="number"
                       step="0.01"

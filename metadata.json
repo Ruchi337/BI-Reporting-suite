@@ -1,6 +1,6 @@
 {
   "name": "ShopSense AI",
-  "description": "Enterprise multi-vendor e-commerce marketplace platform featuring Marketplace Foundation & Vendor Hub, Inventory Intelligence & Forecasting, Customer Analytics, and BI Reporting Suite.",
+  "description": "Enterprise multi-vendor e-commerce marketplace platform featuring Marketplace Foundation, Inventory Intelligence, Customer Analytics, BI Reporting, and Autonomous AI Agent Workflows with Docker & OpenAPI.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

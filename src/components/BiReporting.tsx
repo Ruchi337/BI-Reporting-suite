@@ -4,13 +4,12 @@ import {
   Download, 
   FileText, 
   BarChart3, 
-  DollarSign, 
+  IndianRupee, 
   TrendingUp, 
   AlertCircle, 
   Boxes, 
   CheckCircle2, 
   Sparkles,
-  Activity,
   Layers,
   ArrowUpRight,
   ArrowDownRight,
@@ -20,7 +19,6 @@ import {
   RefreshCw,
   ShoppingBag,
   HelpCircle,
-  Radio,
   ExternalLink,
   ChevronRight,
   Users,
@@ -82,14 +80,22 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [exportToast, setExportToast] = useState<string>('');
-  const [isLiveActive, setIsLiveActive] = useState<boolean>(true);
-  const [realtimeEvents, setRealtimeEvents] = useState<RealTimeSaleEvent[]>([]);
 
   // Fetch all analytics data from backend
   const fetchAnalytics = async () => {
     setLoading(true);
     setError(null);
     try {
+      const safeFetch = async (url: string) => {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) return { success: false };
+          return await res.json();
+        } catch {
+          return { success: false };
+        }
+      };
+
       const [
         summaryRes,
         revenueRes,
@@ -98,30 +104,29 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
         productsRes,
         benchmarksRes
       ] = await Promise.all([
-        fetch('/api/analytics/summary').then(r => r.json()),
-        fetch(`/api/analytics/revenue?timeframe=${timeframe}`).then(r => r.json()),
-        fetch(`/api/analytics/sales?timeframe=${timeframe}`).then(r => r.json()),
-        fetch('/api/analytics/categories').then(r => r.json()),
-        fetch('/api/analytics/products').then(r => r.json()),
-        fetch('/api/analytics/benchmark').then(r => r.json())
+        safeFetch('/api/analytics/summary'),
+        safeFetch(`/api/analytics/revenue?timeframe=${timeframe}`),
+        safeFetch(`/api/analytics/sales?timeframe=${timeframe}`),
+        safeFetch('/api/analytics/categories'),
+        safeFetch('/api/analytics/products'),
+        safeFetch('/api/analytics/benchmark')
       ]);
 
-      if (summaryRes.success) setSummary(summaryRes.data);
-      if (revenueRes.success) setRevenueData(revenueRes.revenueTrend || []);
-      if (salesRes.success) {
+      if (summaryRes?.success) setSummary(summaryRes.data);
+      if (revenueRes?.success) setRevenueData(revenueRes.revenueTrend || []);
+      if (salesRes?.success) {
         setSalesData(salesRes.timeSeries || []);
         setChannelData(salesRes.channelBreakdown || []);
       }
-      if (categoriesRes.success) setCategoryData(categoriesRes.categories || []);
-      if (productsRes.success) setProductAnalytics(productsRes.products || []);
-      if (benchmarksRes.success) {
+      if (categoriesRes?.success) setCategoryData(categoriesRes.categories || []);
+      if (productsRes?.success) setProductAnalytics(productsRes.products || []);
+      if (benchmarksRes?.success) {
         setBenchmarks(benchmarksRes.benchmarks || []);
         setPercentile(benchmarksRes.overallPercentile || 92);
         setRatingLabel(benchmarksRes.ratingLabel || 'Top-Tier Merchant');
       }
-    } catch (err: any) {
-      console.error('Failed to load analytics:', err);
-      setError('Could not connect to Analytics API. Serving local data fallback.');
+    } catch {
+      // Keep existing data quietly on network hiccup
     } finally {
       setLoading(false);
     }
@@ -130,25 +135,6 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
   useEffect(() => {
     fetchAnalytics();
   }, [timeframe]);
-
-  // Real-Time Live Feed simulation / listener
-  useEffect(() => {
-    if (!isLiveActive) return;
-
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch('/api/realtime/sales-feed');
-        const json = await res.json();
-        if (json.success && json.event) {
-          setRealtimeEvents(prev => [json.event, ...prev.slice(0, 7)]);
-        }
-      } catch (e) {
-        // quiet fallback
-      }
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [isLiveActive]);
 
   // Handle CSV Download
   const handleExportCsv = (type: 'sales' | 'revenue' | 'products' | 'customers' | 'inventory') => {
@@ -177,7 +163,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
       )}
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
+      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
@@ -185,49 +171,17 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
               <div className="p-2.5 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-indigo-300">
                 <Database className="h-6 w-6" />
               </div>
-              <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider">
-                Milestone 3 Base Requirement
-              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                Business Intelligence & Analytics Hub
+              </h1>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Business Intelligence & Analytics Hub
-            </h1>
             <p className="text-slate-300 text-sm max-w-2xl mt-1">
               Real-time multi-dimensional reporting, benchmarking against marketplace norms, automated CSV report generation, and interactive data visualizers.
             </p>
           </div>
 
-          {/* Quick Actions & Live Stream Indicator */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Live Feed Toggle */}
-            <button
-              onClick={() => setIsLiveActive(!isLiveActive)}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                isLiveActive 
-                  ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40 shadow-sm shadow-emerald-900/30' 
-                  : 'bg-slate-800 text-slate-400 border-slate-700'
-              }`}
-            >
-              <Radio className={`h-3.5 w-3.5 ${isLiveActive ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
-              <span>{isLiveActive ? 'Live Stream Active' : 'Stream Paused'}</span>
-            </button>
-
-            {/* Timeframe selector */}
-            <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-1 flex items-center space-x-1 text-xs">
-              {(['7d', '30d', '90d', '1y'] as const).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTimeframe(t)}
-                  className={`px-2.5 py-1.5 rounded-lg font-medium transition-all ${
-                    timeframe === t ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {t.toUpperCase()}
-                </button>
-              ))}
-            </div>
-
-            {/* Refresh Button */}
+          {/* Refresh Action */}
+          <div className="flex items-center gap-3">
             <button
               onClick={fetchAnalytics}
               disabled={loading}
@@ -238,27 +192,6 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
             </button>
           </div>
         </div>
-
-        {/* Real-time Sales Ticker */}
-        {realtimeEvents.length > 0 && isLiveActive && (
-          <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center space-x-3 text-xs overflow-x-auto scrollbar-none py-1">
-            <span className="flex items-center space-x-1.5 text-emerald-400 font-bold whitespace-nowrap bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-1 rounded-md">
-              <Activity className="h-3.5 w-3.5 animate-pulse" />
-              <span>LIVE ORDER</span>
-            </span>
-            <div className="flex items-center space-x-4 animate-fadeIn">
-              <span className="text-slate-300 font-medium">
-                {realtimeEvents[0].customerName} purchased <strong className="text-white">{realtimeEvents[0].units}x {realtimeEvents[0].productName}</strong>
-              </span>
-              <span className="text-emerald-300 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
-                +${realtimeEvents[0].amount.toFixed(2)}
-              </span>
-              <span className="text-slate-400 font-mono text-[11px]">
-                via {realtimeEvents[0].channel} ({realtimeEvents[0].timestamp})
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Sub Navigation */}
@@ -266,7 +199,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
         <div className="flex space-x-2">
           {[
             { id: 'overview', label: 'Executive KPI Dashboard', icon: BarChart3 },
-            { id: 'sales-revenue', label: 'Sales & Revenue Analytics', icon: DollarSign },
+            { id: 'sales-revenue', label: 'Sales & Revenue Analytics', icon: IndianRupee },
             { id: 'products-categories', label: 'Catalog & Inventory Health', icon: Boxes },
             { id: 'benchmarks', label: 'Marketplace Benchmarking', icon: TrendingUp },
             { id: 'export', label: 'CSV Data Exports', icon: Download },
@@ -301,18 +234,18 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Revenue (GMV)</span>
                 <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                  <DollarSign className="h-5 w-5" />
+                  <IndianRupee className="h-5 w-5" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline space-x-2">
                 <span className="text-2xl font-black text-slate-900">
-                  ${summary ? summary.totalRevenue.toLocaleString() : '525,800'}
+                  ₹{summary ? summary.totalRevenue.toLocaleString() : '525,800'}
                 </span>
                 <span className="flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
                   <ArrowUpRight className="h-3 w-3" /> +18.4%
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-2">vs. previous period ($444,200)</p>
+              <p className="text-xs text-slate-500 mt-2">vs. previous period (₹444,200)</p>
             </div>
 
             {/* Total Sales Units */}
@@ -347,7 +280,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                   {summary ? summary.totalOrders.toLocaleString() : '3,865'}
                 </span>
                 <span className="text-xs font-medium text-slate-500">
-                  AOV: <strong className="text-slate-800">${summary ? summary.averageOrderValue : '142.50'}</strong>
+                  AOV: <strong className="text-slate-800">₹{summary ? summary.averageOrderValue : '142.50'}</strong>
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-2">99.4% order fulfillment rate</p>
@@ -369,7 +302,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                   <ArrowUpRight className="h-3 w-3" /> +13.4% above avg
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-2">Inventory Value: ${summary ? summary.totalInventoryValuation.toLocaleString() : '38,400'}</p>
+              <p className="text-xs text-slate-500 mt-2">Inventory Value: ₹{summary ? summary.totalInventoryValuation.toLocaleString() : '38,400'}</p>
             </div>
           </div>
 
@@ -380,7 +313,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">Monthly Revenue & Profit Growth</h3>
-                  <p className="text-xs text-slate-500">Gross revenue vs. gross profit and platform benchmark ($)</p>
+                  <p className="text-xs text-slate-500">Gross revenue vs. gross profit and platform benchmark (₹)</p>
                 </div>
                 <div className="flex items-center space-x-2 text-xs">
                   <span className="inline-block w-3 h-3 bg-indigo-600 rounded-sm"></span>
@@ -416,8 +349,8 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="period" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={v => `$${v/1000}k`} />
-                    <Tooltip formatter={(v: any) => [`$${Number(v).toLocaleString()}`, '']} />
+                    <YAxis stroke="#64748b" fontSize={12} tickFormatter={v => `₹${v/1000}k`} />
+                    <Tooltip formatter={(v: any) => [`₹${Number(v).toLocaleString()}`, '']} />
                     <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRev)" name="Revenue" />
                     <Area type="monotone" dataKey="profit" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorProf)" name="Profit" />
                     <Line type="monotone" dataKey="benchmarkRevenue" stroke="#94a3b8" strokeDasharray="4 4" strokeWidth={1.5} name="Marketplace Avg" />
@@ -442,7 +375,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                     <div key={cat.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-medium text-slate-700">{cat.category}</span>
-                        <span className="font-bold text-slate-900">${(cat.gmv / 1000).toFixed(1)}k ({cat.marginPct}% margin)</span>
+                        <span className="font-bold text-slate-900">₹{(cat.gmv / 1000).toFixed(1)}k ({cat.marginPct}% margin)</span>
                       </div>
                       <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div 
@@ -485,7 +418,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                     </span>
                   </div>
                   <p className="text-xs text-indigo-200">
-                    Your Average Order Value ($142.50) is <strong>+20.8%</strong> and Gross Margin (58.4%) is <strong>+32.1%</strong> higher than platform averages.
+                    Your Average Order Value (₹142.50) is <strong>+20.8%</strong> and Gross Margin (58.4%) is <strong>+32.1%</strong> higher than platform averages.
                   </p>
                 </div>
               </div>
@@ -565,7 +498,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                       <p className="text-xs text-slate-500">{ch.units.toLocaleString()} units sold ({ch.percentage}%)</p>
                     </div>
                     <div className="text-right">
-                      <span className="font-black text-slate-900 text-sm">${(ch.revenue / 1000).toFixed(1)}k</span>
+                      <span className="font-black text-slate-900 text-sm">₹{(ch.revenue / 1000).toFixed(1)}k</span>
                       <p className="text-[11px] font-bold text-emerald-600">Active</p>
                     </div>
                   </div>
@@ -620,7 +553,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                         <div className="font-mono text-[11px] text-slate-400">{p.sku}</div>
                       </td>
                       <td className="px-4 py-3 text-slate-600">{p.category}</td>
-                      <td className="px-4 py-3 text-right font-medium text-slate-900">${p.price.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-medium text-slate-900">₹{p.price.toFixed(2)}</td>
                       <td className="px-4 py-3 text-right">
                         <span className={`font-bold ${p.stock <= p.minThreshold ? 'text-rose-600' : 'text-slate-800'}`}>
                           {p.stock} units
@@ -628,7 +561,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                         <div className="text-[10px] text-slate-400 font-mono">({p.daysOfInventoryLeft}d left)</div>
                       </td>
                       <td className="px-4 py-3 text-right text-slate-700 font-semibold">{p.salesUnits30d} units</td>
-                      <td className="px-4 py-3 text-right font-black text-slate-900">${p.revenue30d.toLocaleString()}</td>
+                      <td className="px-4 py-3 text-right font-black text-slate-900">₹{p.revenue30d.toLocaleString()}</td>
                       <td className="px-4 py-3 text-right text-emerald-600 font-bold">{p.marginPct}%</td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
@@ -687,13 +620,13 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
                         <div>
                           <span className="text-[10px] text-slate-400 block uppercase font-medium">Your Store</span>
                           <span className="text-lg font-black text-slate-900">
-                            {bm.unit === '$' ? `$${bm.vendorValue}` : bm.unit === '%' ? `${bm.vendorValue}%` : `${bm.vendorValue} ${bm.unit}`}
+                            {bm.unit === '$' || bm.unit === '₹' ? `₹${bm.vendorValue}` : bm.unit === '%' ? `${bm.vendorValue}%` : `${bm.vendorValue} ${bm.unit}`}
                           </span>
                         </div>
                         <div>
                           <span className="text-[10px] text-slate-400 block uppercase font-medium">Platform Avg</span>
                           <span className="text-lg font-bold text-slate-500">
-                            {bm.unit === '$' ? `$${bm.marketplaceAverage}` : bm.unit === '%' ? `${bm.marketplaceAverage}%` : `${bm.marketplaceAverage} ${bm.unit}`}
+                            {bm.unit === '$' || bm.unit === '₹' ? `₹${bm.marketplaceAverage}` : bm.unit === '%' ? `${bm.marketplaceAverage}%` : `${bm.marketplaceAverage} ${bm.unit}`}
                           </span>
                         </div>
                       </div>
@@ -764,7 +697,7 @@ export const BiReporting: React.FC<BiReportingProps> = ({ products, customers })
               <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all flex flex-col justify-between">
                 <div>
                   <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl w-fit mb-3">
-                    <DollarSign className="h-5 w-5" />
+                    <IndianRupee className="h-5 w-5" />
                   </div>
                   <h4 className="font-bold text-slate-900 text-base">Revenue & Profit Report</h4>
                   <p className="text-xs text-slate-500 mt-1">

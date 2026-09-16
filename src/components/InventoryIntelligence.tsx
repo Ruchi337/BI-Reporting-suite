@@ -164,9 +164,6 @@ export const InventoryIntelligence: React.FC<InventoryIntelligenceProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900">Inventory Intelligence & ML Demand Forecasting</h2>
-            <span className="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-              Milestone 2 Base & Adv
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Real-time stock level monitoring, automated stockout alert triggers, and Holt-Winters / ARIMA time-series ML prediction.
@@ -439,7 +436,7 @@ export const InventoryIntelligence: React.FC<InventoryIntelligenceProps> = ({
       </div>
 
       {/* AI Supply Chain Insights Card */}
-      <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-900 p-5 rounded-2xl border border-indigo-800/40 text-white shadow-md">
+      <div className="bg-linear-to-br from-indigo-900 via-slate-900 to-slate-900 p-5 rounded-2xl border border-indigo-800/40 text-white shadow-md">
         <div className="flex items-center justify-between pb-3 border-b border-indigo-800/50">
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
@@ -527,7 +524,7 @@ export const InventoryIntelligence: React.FC<InventoryIntelligenceProps> = ({
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  Est. Cost: ${(Number(restockQuantity) * activeProduct.cost).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  Est. Cost: ₹{(Number(restockQuantity) * activeProduct.cost).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
               </div>
 

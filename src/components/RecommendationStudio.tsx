@@ -47,9 +47,6 @@ export const RecommendationStudio: React.FC<RecommendationStudioProps> = ({ prod
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-slate-900">Recommendation Systems: Rule-Based vs. Vector AI</h2>
-            <span className="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-              Milestone 2 Base & Adv
-            </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Compare category-based rules against high-dimensional dense vector embeddings & pgvector semantic similarity.
@@ -58,7 +55,7 @@ export const RecommendationStudio: React.FC<RecommendationStudioProps> = ({ prod
       </div>
 
       {/* Interactive Semantic Intent Search Explorer */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl border border-indigo-900/50 text-white shadow-md space-y-4">
+      <div className="bg-linear-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl border border-indigo-900/50 text-white shadow-md space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cpu className="h-5 w-5 text-indigo-400" />
@@ -158,7 +155,7 @@ export const RecommendationStudio: React.FC<RecommendationStudioProps> = ({ prod
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="font-bold text-slate-900 truncate">{item.product.name}</span>
-                    <span className="font-bold text-slate-900 ml-2">${item.product.price.toFixed(2)}</span>
+                    <span className="font-bold text-slate-900 ml-2">₹{item.product.price.toFixed(2)}</span>
                   </div>
                   <p className="text-[11px] text-slate-600 line-clamp-1 mb-1.5">{item.reason}</p>
                   <div className="flex flex-wrap gap-1">
