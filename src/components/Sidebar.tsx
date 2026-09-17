@@ -20,7 +20,7 @@ import {
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  lowStockCount: number;
+  lowStockCount?: number;
 }
 
 interface NavSection {
